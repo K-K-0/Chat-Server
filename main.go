@@ -54,14 +54,14 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 			mutex.Unlock()
 			currentRoom = m.Room
 			log.Println("client joined Room: ", m.Room)
-			broadcast(m.Room, "Someone Joined"+m.Room)
+			broadcast(m.Room, "Someone Joined "+m.Room)
 
 		case "leave":
 			mutex.Lock()
 			removeConn(m.Room, conn)
 			mutex.Unlock()
-			broadcast(m.Room, "someone left"+m.Room)
-			log.Println("client leave room", m.Room)
+			broadcast(m.Room, "someone left "+m.Room)
+			log.Println("client leave room ", m.Room)
 			currentRoom = ""
 
 		case "message":
