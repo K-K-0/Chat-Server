@@ -26,7 +26,7 @@ var mutex sync.Mutex
 func wsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := wsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Error while connection", err)
+		log.Println("Error while connection ", err)
 		return
 	}
 
