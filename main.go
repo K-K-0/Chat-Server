@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -15,6 +16,9 @@ type message struct {
 	Room    string `json:"room"`
 	Content string `json:"content"`
 }
+
+const pingPeriod = 10 * time.Second
+const pongWait = 15 * time.Second
 
 var wsUpgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
@@ -31,6 +35,25 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer conn.Close()
+
+	conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(appData string) error {
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			err := conn.WriteMessage(websocket.PingMessage, []byte{})
+			if err != nil {
+				log.Println("Ping failed, closing connection: ", err)
+				return
+			}
+		}
+	}()
 
 	var currentRoom string
 
